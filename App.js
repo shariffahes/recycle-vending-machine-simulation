@@ -1,16 +1,33 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import 'react-native-gesture-handler';
+import React, { useEffect, useState, useRef } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, ScrollView, Text, View, Button, SafeAreaView, ActivityIndicator } from 'react-native';
+import { StyleSheet, ScrollView, Text, View, Image, SafeAreaView, ActivityIndicator } from 'react-native';
 import { initializeFB } from './config/firebaseConfig';
-import { getDatabase, onValue, ref, set } from 'firebase/database'
+import { getDatabase, onValue, ref } from 'firebase/database'
+import {ModelProvider} from './ModelContext';
+import ScanScreen from './ScanScreen';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
 
-
+const Stack = createStackNavigator();
 export default function App() {
-
-  const [identifyCode, setIdentifyCode] = useState();
-  const [connectedUser, setConnection] = useState(null);
+  useEffect(() => {
+    initializeFB();
+  }, []);
+  return (
+    <ModelProvider>
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen name='CodeScreen' component={CodeScreen} options={{headerShown: false}}/>
+        <Stack.Screen name='ScanScreen' component={ScanScreen} options={{headerShown: false}}/>
+      </Stack.Navigator>
+    </NavigationContainer>
+    </ModelProvider>
+  );
+}
+const CodeScreen = ({navigation}) => {
   const db = useRef();
-
+  const [identifyCode, setIdentifyCode] = useState();
   useEffect(() => {
     initializeFB();
     db.current = getDatabase();
@@ -18,43 +35,43 @@ export default function App() {
     const unsubscribe = onValue(identificationCodeRef, (snapshot) => {
       if (!snapshot) return;
       const data = snapshot.val();
+        setIdentifyCode();
       if (data.Code) {
         const c = data.Code;
         const code = [];
         for (var i = 0; i < c.length; i++) {
           code.push(c.charAt(i));
         }
-        setIdentifyCode(code)
+        setIdentifyCode(code);
       } else {
-        setIdentifyCode();
-        const user = data.User;
-        for (const [key, value] of Object.entries(user)) {
-          setConnection({ id: key, collectedPoints: value });
-        }
+        navigation.replace('ScanScreen');
       }
     });
     return () => {
       unsubscribe();
     }
   }, []);
-
-  const incrementPoints = useCallback((val) => {
-    if (!connectedUser?.id) return;
-    const reference = ref(db.current, '/recyclers/VM/User');
-    set(reference, { [connectedUser.id]: val });
-  }, [db, ref, connectedUser]);
-
+  
   if (!identifyCode) {
     return (
-      <View>
+      <View style={{ flex: 1 }}>
         <ActivityIndicator size='large' />
-        <Button style={{ backgroundColor: 'blue' }} title='Add 100 points' onPress={() => incrementPoints(100)} />
       </View>
     );
   }
   return (
-    <SafeAreaView>
-      <View style={{ paddingTop: 30, alignItems: 'center' }}>
+    <SafeAreaView style={{backgroundColor: '#fff', flex: 1}}>
+      <View style={{ paddingTop: 30, alignItems: 'center'}}>
+        <View style={{ justifyContent: 'center', alignItems: 'center'}}>
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <Text style={{fontSize: 20, marginRight: 10}}>Step 1: Scan the QR Code</Text>
+            <View style={{width: 60, height: 60}}>
+              <Image source={require('./assets/gif/QRScan.gif')} style={{ height: '100%', width: '100%' }} resizeMode='contain'/>
+            </View>
+          </View>
+          <Image source={require('./assets/QRCode.png')} resizeMode="contain" style={{width: 300, height: 400}}/>
+          <Text style={{ fontSize: 20, alignSelf: 'flex-start', marginBottom: 20}}>Step 2: Enter the below code</Text>
+        </View>
         <ScrollView horizontal={true}>
           {identifyCode.map((ch, index) => <CodeNumber key={index} num={ch} />)}
         </ScrollView>
@@ -62,7 +79,7 @@ export default function App() {
       </View>
     </SafeAreaView>
   );
-}
+};
 const CodeNumber = ({ num }) => {
   return (
     <View style={styles.codeContainer}>
