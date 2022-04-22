@@ -28,14 +28,19 @@ export default function App() {
 const CodeScreen = ({navigation}) => {
   const db = useRef();
   const [identifyCode, setIdentifyCode] = useState();
+  const [err, setError] = useState(false);
   useEffect(() => {
     initializeFB();
     db.current = getDatabase();
     const identificationCodeRef = ref(db.current, 'recyclers/VM');
     const unsubscribe = onValue(identificationCodeRef, (snapshot) => {
-      if (!snapshot) return;
+      if (!snapshot || !snapshot.val()) {
+        setError(true);
+        return;
+      }
       const data = snapshot.val();
-        setIdentifyCode();
+      setIdentifyCode();
+      setError(false);
       if (data.Code) {
         const c = data.Code;
         const code = [];
@@ -43,15 +48,31 @@ const CodeScreen = ({navigation}) => {
           code.push(c.charAt(i));
         }
         setIdentifyCode(code);
-      } else {
+      } else if (data.User){
         navigation.replace('ScanScreen');
+      } else {
+        setError(true);
       }
     });
     return () => {
       unsubscribe();
     }
   }, []);
-  
+  if(err) {
+    return (
+      <View style={{flex: 1, alignItems: 'flex-start', justifyContent: 'center'}}>
+        <Text style={{fontSize: 20, paddingHorizontal: 12}}>
+          We are aware that there is an error with the Vending Machine :(
+        </Text>
+        <Text style={{fontSize: 20, paddingHorizontal: 12, paddingVertical: 10}}>
+          Our team is working on it.
+        </Text>
+        <Text style={{ fontSize: 20, paddingHorizontal: 12 }}>
+          Sorry for the inconvenience!
+        </Text>
+      </View>
+    );
+  }
   if (!identifyCode) {
     return (
       <View style={{ flex: 1 }}>
