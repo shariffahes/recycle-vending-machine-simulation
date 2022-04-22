@@ -1,6 +1,6 @@
 export const materials = {
     "water bottle": "Plastic",
-    "water jud": "Plastic",
+    "water jug": "Plastic",
     bucket: "Plastic",
     pail: "Plastic",
     beaker: "Glass",
