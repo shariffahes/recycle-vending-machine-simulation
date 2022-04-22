@@ -1,7 +1,7 @@
 import 'react-native-gesture-handler';
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, ScrollView, Text, View, Button, SafeAreaView, ActivityIndicator } from 'react-native';
+import { StyleSheet, ScrollView, Text, View, Image, SafeAreaView, ActivityIndicator } from 'react-native';
 import { initializeFB } from './config/firebaseConfig';
 import { getDatabase, onValue, ref } from 'firebase/database'
 import {ModelProvider} from './ModelContext';
@@ -60,8 +60,18 @@ const CodeScreen = ({navigation}) => {
     );
   }
   return (
-    <SafeAreaView>
-      <View style={{ paddingTop: 30, alignItems: 'center' }}>
+    <SafeAreaView style={{backgroundColor: '#fff', flex: 1}}>
+      <View style={{ paddingTop: 30, alignItems: 'center'}}>
+        <View style={{ justifyContent: 'center', alignItems: 'center'}}>
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <Text style={{fontSize: 20, marginRight: 10}}>Step 1: Scan the QR Code</Text>
+            <View style={{width: 60, height: 60}}>
+              <Image source={require('./assets/gif/QRScan.gif')} style={{ height: '100%', width: '100%' }} resizeMode='contain'/>
+            </View>
+          </View>
+          <Image source={require('./assets/QRCode.png')} resizeMode="contain" style={{width: 300, height: 400}}/>
+          <Text style={{ fontSize: 20, alignSelf: 'flex-start', marginBottom: 20}}>Step 2: Enter the below code</Text>
+        </View>
         <ScrollView horizontal={true}>
           {identifyCode.map((ch, index) => <CodeNumber key={index} num={ch} />)}
         </ScrollView>

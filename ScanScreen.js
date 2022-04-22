@@ -1,6 +1,6 @@
 import { Camera } from "expo-camera";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Image, StyleSheet, Text, View, ActivityIndicator, Button } from "react-native";
+import { Image, StyleSheet, Text, View, ActivityIndicator, Button, Modal, useWindowDimensions } from "react-native";
 import { fetch } from '@tensorflow/tfjs-react-native';
 import * as tf from '@tensorflow/tfjs';
 import * as ImageManipulator from "expo-image-manipulator";
@@ -8,6 +8,7 @@ import * as jpeg from "jpeg-js";
 import { useModel } from './ModelContext';
 import { materials, materialInfo } from './Data/items';
 import { getDatabase, onValue, ref, set } from "firebase/database";
+
 
 const identifyMaterial = (itemName) => {
     let res;
@@ -33,6 +34,7 @@ const ScanScreen = ({navigation}) => {
     const camera = useRef(null);
     const imageURL = useRef(null);
     const db = getDatabase();
+    const {height} = useWindowDimensions();
 
     useEffect(async () => {
       const getPermission = async () => {
@@ -135,6 +137,13 @@ const ScanScreen = ({navigation}) => {
     }
 
     return (
+        <>
+        <Modal animationType="fade" visible={ismodelDetecting} transparent={true}>
+          <View style={{alignSelf: 'center', backgroundColor: '#fff', height: 150, width: 150, borderRadius: 12, position: 'absolute', top: height * 0.35, alignItems: 'center', justifyContent: 'center'}}>
+            <Image source={require('./assets/gif/ObjectScan.gif')} style={{width: '100%', height: '80%'}} resizeMode='contain'/>
+            <Text style={{fontSize: 14, fontWeight: 'bold', marginBottom: 8}}>Detecting ......</Text>
+          </View>
+        </Modal>
         <Camera ref={camera} style={styles.camContainer}>
             <View style={styles.mainContainer}>
                 <Text style={styles.textStyle}>Scan your object here</Text>
@@ -143,6 +152,7 @@ const ScanScreen = ({navigation}) => {
                 <Button title='Detect Object' onPress={detectObject}/>
             </View>
         </Camera>
+        </>
     );
 };
 
