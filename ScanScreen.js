@@ -43,19 +43,20 @@ const ScanScreen = ({navigation}) => {
       }
       getPermission();
       const userRef = ref(db, 'recyclers/VM/User');
-      const vmRef = ref(db, 'recyclers/VM');
-      const timeout = setTimeout(() => {
-         let code = '';
-         for(let i = 0; i < 4; i++) {
-           const randChar = Math.floor(Math.random() * (90 - 65) + 65);
-           const randNum = Math.floor(Math.random() * (9 - 0) + 0);
-           if (i < 3) code += String.fromCharCode(randChar);
-           else code += `${randNum}`
-        };
-        set(vmRef, {'Code': code});
-      }, 120000);
+    // const vmRef = ref(db, 'recyclers/VM');
+    //   const timeout = setTimeout(() => {
+    //      let code = '';
+    //      for(let i = 0; i < 4; i++) {
+    //        const randChar = Math.floor(Math.random() * (90 - 65) + 65);
+    //        const randNum = Math.floor(Math.random() * (9 - 0) + 0);
+    //        if (i < 3) code += String.fromCharCode(randChar);
+    //        else code += `${randNum}`
+    //     };
+    //     set(vmRef, {'Code': code});
+    //   }, 120000);
       const unsubscribe = onValue(userRef, (snapshot) => {
-        if(!snapshot || !snapshot.val()) return;
+        console.log(snapshot);
+        if(!snapshot) return;
         if(!snapshot.val()) {
           navigation.replace('CodeScreen');
           return;
@@ -152,7 +153,7 @@ const ScanScreen = ({navigation}) => {
         <>
         <Modal animationType="fade" visible={ismodelDetecting} transparent={true}>
           <View style={{alignSelf: 'center', backgroundColor: '#fff', height: 150, width: 150, borderRadius: 12, position: 'absolute', top: height * 0.35, alignItems: 'center', justifyContent: 'center'}}>
-            <Image source={require('./assets/gif/ObjectScan.gif')} style={{width: '100%', height: '80%'}} resizeMode='contain'/>
+            <Image source={require('./assets/gif/ObjectScan.gif')} style={{width: '80%', height: '80%'}} resizeMode='contain'/>
             <Text style={{fontSize: 14, fontWeight: 'bold', marginBottom: 8}}>Detecting ......</Text>
           </View>
         </Modal>
